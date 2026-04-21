@@ -235,13 +235,13 @@ alt_fasta_index = args.alt_fasta_index
 
 
 
-chromosomes = ("/home/fswift/0_scripts/0_git/ac3/Chromosome_name_conversion_files/ilAglIoxx1.1_chromosomes.txt")
+##chromosomes = ("/home/fswift/0_scripts/0_git/ac3/Chromosome_name_conversion_files/ilAglIoxx1.1_chromosomes.txt")
 #Reading in ref bam
-bamfile = pysam.AlignmentFile("/mnt/loki/martin/frankie/RNA_seq_glm/1_analysis_files/0_sorted_bams/ilAglIoxx1.1_GCA_905147045.1_ref_num.sort.bam", "rb")
+##bamfile = pysam.AlignmentFile("/mnt/loki/martin/frankie/RNA_seq_glm/1_analysis_files/0_sorted_bams/ilAglIoxx1.1_GCA_905147045.1_ref_num.sort.bam", "rb")
 #Reading in ref gff
-ref_annotation = gffpd.read_gff3('/mnt/loki/martin/frankie/RNA_seq_glm/raw_files/gff_files/ilAglIoxx1.1_GCA_905147045.1.gff3')
+##ref_annotation = gffpd.read_gff3('/mnt/loki/martin/frankie/RNA_seq_glm/raw_files/gff_files/ilAglIoxx1.1_GCA_905147045.1.gff3')
 #Reading in alt gff
-alt_annotation = gffpd.read_gff3('/mnt/loki/martin/frankie/RNA_seq_glm/raw_files/gff_files/ilAglIoxx1.1_GCA_905147125.1_liftover.gff3_polished')
+##alt_annotation = gffpd.read_gff3('/mnt/loki/martin/frankie/RNA_seq_glm/raw_files/gff_files/ilAglIoxx1.1_GCA_905147125.1_liftover.gff3_polished')
 
 
 #chromosomes = ("/home/s1929681/One_drive_file_copies_25_01_15/RA_work/Indel_Project/data_set_chroms/ilAmpTrag2.1_chromosomes.txt")
@@ -265,8 +265,8 @@ alt_annotation = gffpd.read_gff3('/mnt/loki/martin/frankie/RNA_seq_glm/raw_files
 #Getting the start and end positions for each chromosome in alt in order to do the array approach for SNP and monomorphic sites 
 #with open("/media/s1929681/Seagate_B/Frankie_DTOL_lep_project/phase_two_fasta/ilAmpTrag2.1_GCA_905220425.1.fa.fai", "rt") as lf:
 #with open("/media/s1929681/Seagate_B/Frankie_DTOL_lep_project/phase_two_fasta/iyBomPrat1.1_GCA_930367225.1.fa.fai", "rt") as lf:
-with open("/mnt/loki/martin/frankie/RNA_seq_glm/raw_files/fasta_files/ilAglIoxx1.1_GCA_905147125.1_num.fa.fai", "rt") as lf:
-#with open(alt_fasta_index, "rt") as lf:
+#with open("/mnt/loki/martin/frankie/RNA_seq_glm/raw_files/fasta_files/ilAglIoxx1.1_GCA_905147125.1_num.fa.fai", "rt") as lf:
+with open(alt_fasta_index, "rt") as lf:
     chromLenDict = dict([[s[0],int(s[1])] for s in [l.split() for l in lf]])
 
 long_to_short = chromosome_dict_maker(chromosomes, 2 , '\t', autosomes_only=True)
