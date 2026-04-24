@@ -185,8 +185,9 @@ finalise_outputs() {
     done
 
     rsync -av "$WORKDIR"/*.bam* "${OUTPUT_BASE}/0_bams/"
+    rm -f "$WORKDIR"/*.bam* 
     rsync -av "$WORKDIR" "${OUTPUT_BASE}/1_alignment_extra_files/"
-
+    rm -rf "${STAR_REF_BASE}/star_index_${name}_*"
     rm -rf "$WORKDIR"
 }
 
