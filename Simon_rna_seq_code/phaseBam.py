@@ -98,17 +98,19 @@ sample_idx = None if args.use_REF_and_ALT else 0
 #chromosomes='/home/s1929681/git_directories/ac3/Chromosome_name_conversion_files/ilAntChix2.1_chromosomes.txt'
 
 chromosomes=(args.chromosomes)
-
-if args.autosome_only:
-    if args.numeric_chroms:
-        chrom_name_dict = chromosome_dict_maker(chromosomes, 2, '\t', autosomes_only=True, short_to_long=True)
-    else:
-        chrom_name_dict = chromosome_dict_maker(chromosomes, 2, '\t', autosomes_only=True, short_to_long=False)
-elif not args.autosome_only:
-    if args.numeric_chroms:
-        chrom_name_dict = chromosome_dict_maker(chromosomes, 2, '\t', autosomes_only=False, short_to_long=True)
-    else:
-        chrom_name_dict = chromosome_dict_maker(chromosomes, 2, '\t', autosomes_only=False, short_to_long=False)
+if args.chromosomes:
+    if args.autosome_only:
+        if args.numeric_chroms:
+            chrom_name_dict = chromosome_dict_maker(chromosomes, 2, '\t', autosomes_only=True, short_to_long=True)
+        else:
+            chrom_name_dict = chromosome_dict_maker(chromosomes, 2, '\t', autosomes_only=True, short_to_long=False)
+    elif not args.autosome_only:
+        if args.numeric_chroms:
+            chrom_name_dict = chromosome_dict_maker(chromosomes, 2, '\t', autosomes_only=False, short_to_long=True)
+        else:
+            chrom_name_dict = chromosome_dict_maker(chromosomes, 2, '\t', autosomes_only=False, short_to_long=False)
+else:
+    chrom_name_dict = None
 
 #with open('/Users/frankieswift/OneDrive/RA_Work/Indel_Project/data_set_chroms/iyBomPrat1.1_chromosomes.txt', "rt") as chromfile:
 #        chrom_name_dict = dict([(line.split()[2::-1]) for line in chromfile])
