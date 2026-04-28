@@ -78,7 +78,7 @@ parser.add_argument("--sampleID", help="Sample ID if not using first sample in V
 parser.add_argument("--min_map_qual", help="Minumum mapping quality for reads", action = "store", type=int, default=0)
 parser.add_argument("--min_base_qual", help="Minumum base quality for matching haplotypes", action = "store", type=int, default=20)
 parser.add_argument("--min_matches", help="Minumum high quality bases to match diagnostic allele (summed across read pair)", action = "store", type=int, default=1)
-parser.add_argument("--chromosomes", help="Chromosome converter file", action = "store", type=int, default=1)
+parser.add_argument("--chromosomes", help="Chromosome converter file", action = "store")
 parser.add_argument("--autosome_only", help="Do you only want autosomes?", action = "store", default=False)
 parser.add_argument("--numeric_chroms", help="Are you chromosomes in numeric form?", action = "store", default=False)
 parser.add_argument("--max_pair_dist", help="Maximum distance to look for paired reads (must be less than window size)", action = "store", type=int, default=100000)
