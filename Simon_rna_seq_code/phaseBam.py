@@ -14,6 +14,8 @@ import pysam
 
 import cyvcf2
 
+import tqdm as tqdm
+
 #Gets all the SNPs in the windows?
 def get_phased_variants(vcf, chrom, start, end, sample_idx=None, useREFandALT=False):
     variants = {}
@@ -78,6 +80,7 @@ parser.add_argument("--min_matches", help="Minumum high quality bases to match d
 parser.add_argument("--bam_to_vcf_chrom_file", help="File relating chrom name in bam (1st column) to vcf (2nd column)", action = "store")
 parser.add_argument("--vcf_to_bam_chrom_file", help="File relating chrom name in vcf (1st column) to bam (2nd column)", action = "store")
 parser.add_argument("--max_pair_dist", help="Maximum distance to look for paired reads (must be less than window size)", action = "store", type=int, default=100000)
+parser.add_argument("--run_quietly", help="Prevents printing of every window", action = "store", default=False, required = False)
 
 
 #args = parser.parse_args("-b temp.bam -v /data/martin/genomics/analyses/DTOL_insect_indels/whole_genome_files/VCFs/iyBomPrat1.1.vcf.gz --use_REF_and_ALT -o test --vcf_to_bam_chrom_file iyBomPrat1.1_chromosomes.txt".split())
@@ -133,13 +136,13 @@ for chrom in chrom_names:
             except:
                 print(f"Warning: chromosome '{chrom}' not included in chromosome conversion file. Skipping.", file=sys.stderr)
                 continue
-    
+    print(f"Analysing chromosome {chrom}", file=sys.stderr)
     previous_read_names = set()
     for window_end in range(window_size, chrom_lengths[chrom] + step_size, step_size):
         window_start = window_end - window_size
         
-        
-        print(chrom, window_start+1, window_end, file=sys.stderr)
+        if not args.run_quietly:
+            print(chrom, window_start+1, window_end, file=sys.stderr)
         
         midpoint = window_start + step_size
         
@@ -164,7 +167,8 @@ for chrom in chrom_names:
         
         npairs = len(reads_by_pair)
         
-        print(f"{npairs} read pairs.", file=sys.stderr)
+        if not args.run_quietly:
+            print(f"{npairs} read pairs.", file=sys.stderr)
         
         if npairs ==0:
             print("\n", file=sys.stderr)
@@ -178,7 +182,8 @@ for chrom in chrom_names:
                                        start=variants_start, end=variants_end,
                                        sample_idx=sample_idx, useREFandALT=args.use_REF_and_ALT)
 
-        print(f"{len(variants)} phased variants.", file=sys.stderr)
+        if not args.run_quietly:
+            print(f"{len(variants)} phased variants.", file=sys.stderr)
 
         pairs_phased = 0
         
@@ -191,7 +196,8 @@ for chrom in chrom_names:
                 for read in reads:
                     outBams[phase].write(read)
         
-        print(f"{pairs_phased} read pairs were phased.\n", file=sys.stderr)
+        if not args.run_quietly:
+            print(f"{pairs_phased} read pairs were phased.\n", file=sys.stderr)
         
         previous_read_names = set(reads_by_pair.keys())
 
