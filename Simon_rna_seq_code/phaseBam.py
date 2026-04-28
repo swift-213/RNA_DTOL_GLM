@@ -104,11 +104,10 @@ if args.autosome_only:
         chrom_name_dict = chromosome_dict_maker(chromosomes, 2, '\t', autosomes_only=True, short_to_long=True)
     else:
         chrom_name_dict = chromosome_dict_maker(chromosomes, 2, '\t', autosomes_only=True, short_to_long=False)
-else: 
-    if args.numeric_chroms:
+elif args.numeric_chroms:
         chrom_name_dict = chromosome_dict_maker(chromosomes, 2, '\t', autosomes_only=False, short_to_long=True)
-    else:
-        chrom_name_dict = chromosome_dict_maker(chromosomes, 2, '\t', autosomes_only=False, short_to_long=False)
+else:
+    chrom_name_dict = chromosome_dict_maker(chromosomes, 2, '\t', autosomes_only=False, short_to_long=False)
 
 #with open('/Users/frankieswift/OneDrive/RA_Work/Indel_Project/data_set_chroms/iyBomPrat1.1_chromosomes.txt', "rt") as chromfile:
 #        chrom_name_dict = dict([(line.split()[2::-1]) for line in chromfile])
