@@ -99,7 +99,7 @@ sample_idx = None if args.use_REF_and_ALT else 0
 
 chromosomes=(args.chromosomes)
 
-if args.autosomes_only:
+if args.autosome_only:
     if args.numeric_chroms:
         chrom_name_dict = chromosome_dict_maker(chromosomes, 2, '\t', autosomes_only=True, short_to_long=True)
     else:
