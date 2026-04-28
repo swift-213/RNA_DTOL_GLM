@@ -14,7 +14,8 @@ import pysam
 
 import cyvcf2
 
-import tqdm as tqdm
+from general.genfun import chromosome_dict_maker
+
 
 #Gets all the SNPs in the windows?
 def get_phased_variants(vcf, chrom, start, end, sample_idx=None, useREFandALT=False):
@@ -77,8 +78,9 @@ parser.add_argument("--sampleID", help="Sample ID if not using first sample in V
 parser.add_argument("--min_map_qual", help="Minumum mapping quality for reads", action = "store", type=int, default=0)
 parser.add_argument("--min_base_qual", help="Minumum base quality for matching haplotypes", action = "store", type=int, default=20)
 parser.add_argument("--min_matches", help="Minumum high quality bases to match diagnostic allele (summed across read pair)", action = "store", type=int, default=1)
-parser.add_argument("--bam_to_vcf_chrom_file", help="File relating chrom name in bam (1st column) to vcf (2nd column)", action = "store")
-parser.add_argument("--vcf_to_bam_chrom_file", help="File relating chrom name in vcf (1st column) to bam (2nd column)", action = "store")
+parser.add_argument("--chromosomes", help="Chromosome converter file", action = "store", type=int, default=1)
+parser.add_argument("--autosome_only", help="Do you only want autosomes?", action = "store", default=False)
+parser.add_argument("--numeric_chroms", help="Are you chromosomes in numeric form?", action = "store", default=False)
 parser.add_argument("--max_pair_dist", help="Maximum distance to look for paired reads (must be less than window size)", action = "store", type=int, default=100000)
 parser.add_argument("--run_quietly", help="Prevents printing of every window", action = "store", default=False, required = False)
 
@@ -86,32 +88,35 @@ parser.add_argument("--run_quietly", help="Prevents printing of every window", a
 #args = parser.parse_args("-b temp.bam -v /data/martin/genomics/analyses/DTOL_insect_indels/whole_genome_files/VCFs/iyBomPrat1.1.vcf.gz --use_REF_and_ALT -o test --vcf_to_bam_chrom_file iyBomPrat1.1_chromosomes.txt".split())
 
 args = parser.parse_args()
-#vcf = cyvcf2.VCF('/Volumes/Seagate/Frankie_DTOL_lep_project/outputs/VCF/ilEupSimi1.1.vcf.gz')
+#vcf = cyvcf2.VCF('/media/s1929681/Seagate_B/Frankie_DTOL_lep_project/RNA_project_file_storage/0_VCFS/ilAntChix2.1_GCA_947359405.1_ref_num.vcf.gz')
 #vcf = cyvcf2.VCF('/Volumes/Seagate/Frankie_DTOL_lep_project/outputs/VCF/iyBomPrat1.1.vcf.gz')
 #"/data/martin/genomics/analyses/DTOL_insect_indels/whole_genome_files/VCFs/iyBomPrat1.1.vcf.gz"
 vcf = cyvcf2.VCF(args.vcf, samples= [args.sampleID] if args.sampleID else None)
 
 sample_idx = None if args.use_REF_and_ALT else 0
 
-#with open('/Users/frankieswift/OneDrive/RA_Work/Indel_Project/data_set_chroms/ilEupSimi1.1_chromosomes.txt', "rt") as chromfile:
-#        chrom_name_dict = dict([(line.split()[2::-1]) for line in chromfile])
+#chromosomes='/home/s1929681/git_directories/ac3/Chromosome_name_conversion_files/ilAntChix2.1_chromosomes.txt'
 
+chromosomes=(args.chromosomes)
+
+if args.autosomes_only:
+    if args.numeric_chroms:
+        chrom_name_dict = chromosome_dict_maker(chromosomes, 2, '\t', autosomes_only=True, short_to_long=True)
+    else:
+        chrom_name_dict = chromosome_dict_maker(chromosomes, 2, '\t', autosomes_only=True, short_to_long=False)
+else: 
+    if args.numeric_chroms:
+        chrom_name_dict = chromosome_dict_maker(chromosomes, 2, '\t', autosomes_only=False, short_to_long=True)
+    else:
+        chrom_name_dict = chromosome_dict_maker(chromosomes, 2, '\t', autosomes_only=False, short_to_long=False)
 
 #with open('/Users/frankieswift/OneDrive/RA_Work/Indel_Project/data_set_chroms/iyBomPrat1.1_chromosomes.txt', "rt") as chromfile:
 #        chrom_name_dict = dict([(line.split()[2::-1]) for line in chromfile])
 
-if args.bam_to_vcf_chrom_file:
-    with open(args.bam_to_vcf_chrom_file, "rt") as chromfile:
-        chrom_name_dict = dict([(line.split()[:2]) for line in chromfile])
-
-if args.vcf_to_bam_chrom_file:
-    with open(args.vcf_to_bam_chrom_file, "rt") as chromfile:
-        chrom_name_dict = dict([(line.split()[2::-1]) for line in chromfile])
-else:
-    chrom_name_dict = None
 
 
-#bam = pysam.AlignmentFile("/data/martin/genomics/analyses/DTOL_insect_indels/RNA_seq/ERR7113577_Aligned.sortedByCoord.out.bam", "rb")
+
+#bam = pysam.AlignmentFile("/media/s1929681/Seagate_B/Frankie_DTOL_lep_project/RNA_project_file_storage/1_RNA_read_alignments/ilAntChix2.1_GCA_947359405.1_Aligned_exon_overlap_paired_filtered_RG_reads_Aligned_duplicates_annotated.sortedByCoord.out.bam", "rb")
 #bam = pysam.AlignmentFile("/Volumes/Seagate/Frankie_DTOL_lep_project/RNA_seq_practise/ERR7113577_Aligned.sortedByCoord.out.bam", "rb")
 #bam = pysam.AlignmentFile("/Volumes/Seagate/Frankie_DTOL_lep_project/RNA_seq_practise/ERR6286704_Aligned.sortedByCoord.out.bam", "rb")
 #bam reader
@@ -130,10 +135,11 @@ step_size = args.max_pair_dist
 window_size = step_size*2
 
 for chrom in chrom_names:
- 
+    
     if chrom_name_dict:
-            try: vcf_chrom = chrom_name_dict[chrom]
-            except:
+            if chrom in chrom_name_dict.keys():
+                vcf_chrom = chrom
+            else:
                 print(f"Warning: chromosome '{chrom}' not included in chromosome conversion file. Skipping.", file=sys.stderr)
                 continue
     print(f"Analysing chromosome {chrom}", file=sys.stderr)
