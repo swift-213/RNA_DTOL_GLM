@@ -177,7 +177,8 @@ for chrom in chrom_names:
             print(f"{npairs} read pairs.", file=sys.stderr)
         
         if npairs ==0:
-            print("\n", file=sys.stderr)
+            if not args.run_quietly:
+                print("\n", file=sys.stderr)
             continue
         
         #get the start and end for variants, which will possibly extend a little either way because of the reads that overlap
