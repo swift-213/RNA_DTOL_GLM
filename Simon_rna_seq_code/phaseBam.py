@@ -110,8 +110,6 @@ elif not args.autosome_only:
     else:
         chrom_name_dict = chromosome_dict_maker(chromosomes, 2, '\t', autosomes_only=False, short_to_long=False)
 
-print(chrom_name_dict)
-
 #with open('/Users/frankieswift/OneDrive/RA_Work/Indel_Project/data_set_chroms/iyBomPrat1.1_chromosomes.txt', "rt") as chromfile:
 #        chrom_name_dict = dict([(line.split()[2::-1]) for line in chromfile])
 
@@ -186,7 +184,11 @@ for chrom in chrom_names:
         variants_start = min([read.reference_start for read in window_reads]) + 1 #also make it 1-based for vcf
         variants_end = max([read.reference_end for read in window_reads]) + 1
         
-        variants = get_phased_variants(vcf, chrom = chrom_name_dict[chrom] if chrom_name_dict else chrom,
+        #variants = get_phased_variants(vcf, chrom if chrom_name_dict else chrom,
+        #                               start=variants_start, end=variants_end,
+        #                               sample_idx=sample_idx, useREFandALT=args.use_REF_and_ALT)
+
+        variants = get_phased_variants(vcf, chrom,
                                        start=variants_start, end=variants_end,
                                        sample_idx=sample_idx, useREFandALT=args.use_REF_and_ALT)
 
