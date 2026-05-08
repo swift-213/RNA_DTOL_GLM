@@ -199,7 +199,7 @@ for chrom in chrom_names:
         if not args.run_quietly:
             print(f"{pairs_phased} read pairs were phased.\n", file=sys.stderr)
         previous_read_names = set(reads_by_pair.keys())
-    window_size=args.step_size*2
+    window_size=step_size*2
     #window_size=step_size*2
 
 
