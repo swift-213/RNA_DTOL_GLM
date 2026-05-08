@@ -88,14 +88,14 @@ parser.add_argument("--run_quietly", help="Prevents printing of every window", a
 #args = parser.parse_args("-b temp.bam -v /data/martin/genomics/analyses/DTOL_insect_indels/whole_genome_files/VCFs/iyBomPrat1.1.vcf.gz --use_REF_and_ALT -o test --vcf_to_bam_chrom_file iyBomPrat1.1_chromosomes.txt".split())
 
 args = parser.parse_args()
-#vcf = cyvcf2.VCF('/media/s1929681/Seagate_B/Frankie_DTOL_lep_project/RNA_project_file_storage/0_VCFS/ilAntChix2.1_GCA_947359405.1_ref_num.vcf.gz')
+#vcf = cyvcf2.VCF('/mnt/loki/martin/frankie/RNA_seq_glm/1_analysis_files/1_VCFs/ilGriApri1.1_GCA_916610245.1_alt_num.vcf.gz')
 #vcf = cyvcf2.VCF('/Volumes/Seagate/Frankie_DTOL_lep_project/outputs/VCF/iyBomPrat1.1.vcf.gz')
 #"/data/martin/genomics/analyses/DTOL_insect_indels/whole_genome_files/VCFs/iyBomPrat1.1.vcf.gz"
 vcf = cyvcf2.VCF(args.vcf, samples= [args.sampleID] if args.sampleID else None)
 
 sample_idx = None if args.use_REF_and_ALT else 0
 
-#chromosomes='/home/s1929681/git_directories/ac3/Chromosome_name_conversion_files/ilAntChix2.1_chromosomes.txt'
+#chromosomes='/home/fswift/0_scripts/0_git/ac3/Chromosome_name_conversion_files/ilGriApri1.1_chromosomes.txt'
 
 chromosomes=(args.chromosomes)
 if args.chromosomes:
@@ -118,7 +118,7 @@ else:
 
 
 
-#bam = pysam.AlignmentFile("/media/s1929681/Seagate_B/Frankie_DTOL_lep_project/RNA_project_file_storage/1_RNA_read_alignments/ilAntChix2.1_GCA_947359405.1_Aligned_exon_overlap_paired_filtered_RG_reads_Aligned_duplicates_annotated.sortedByCoord.out.bam", "rb")
+#bam = pysam.AlignmentFile("/mnt/loki/martin/frankie/RNA_seq_glm/1_analysis_files/11_RNA_seq_read_bams/0_bams/ilGriApri1.1_GCA_916610245.1_Aligned_exon_overlap_paired_filtered_RG_reads_Aligned_duplicates_annotated.sortedByCoord.out.bam", "rb")
 #bam = pysam.AlignmentFile("/Volumes/Seagate/Frankie_DTOL_lep_project/RNA_seq_practise/ERR7113577_Aligned.sortedByCoord.out.bam", "rb")
 #bam = pysam.AlignmentFile("/Volumes/Seagate/Frankie_DTOL_lep_project/RNA_seq_practise/ERR6286704_Aligned.sortedByCoord.out.bam", "rb")
 #bam reader
@@ -131,13 +131,11 @@ chrom_lengths = dict(zip(chrom_names, bam.lengths))
 outBams = [pysam.AlignmentFile(args.out_prefix + "_1_unsorted.bam", "wb", template = bam),
            pysam.AlignmentFile(args.out_prefix + "_2_unsorted.bam", "wb", template = bam)]
 
-
 step_size = args.max_pair_dist
 
 window_size = step_size*2
 
 for chrom in chrom_names:
-    
     if chrom_name_dict:
             if chrom in chrom_name_dict.keys():
                 vcf_chrom = chrom
@@ -146,73 +144,64 @@ for chrom in chrom_names:
                 continue
     print(f"Analysing chromosome {chrom}", file=sys.stderr)
     previous_read_names = set()
+    if chrom_lengths[chrom] >= window_size:
+        window_size=window_size
+    else:
+        window_size = chrom_lengths[chrom]
     for window_end in range(window_size, chrom_lengths[chrom] + step_size, step_size):
         window_start = window_end - window_size
-        
         if not args.run_quietly:
             print(chrom, window_start+1, window_end, file=sys.stderr)
-        
-        midpoint = window_start + step_size
-        
+        if chrom_lengths[chrom] >= window_size:
+            midpoint = window_start + step_size
+        else:
+            midpoint = int(chrom_lengths[chrom]/2)
         window_reads = list(bam.fetch(chrom, window_start, window_end))
-        
         #mapping qual fiter
         window_reads = [read for read in window_reads if read.mapping_quality >= args.min_map_qual]
-        
+        #window_reads = [read for read in window_reads if read.mapping_quality >= 20]
         #those in the first half of the window that were processed previously can be removed
         window_reads = [read for read in window_reads if read.reference_start > midpoint or read.query_name not in previous_read_names]
-        
         #How many times the reads are present??
         pair_names, pair_counts = np.unique([read.query_name for read in window_reads], return_counts=True)
-        
         name_counts = dict(zip(pair_names, pair_counts))
-        
         reads_by_pair = defaultdict(list)
-        
         for i, read in enumerate(window_reads):
             if read.reference_end < midpoint or name_counts[read.query_name] > 1:
                 reads_by_pair[read.query_name].append(read)
-        
         npairs = len(reads_by_pair)
-        
         if not args.run_quietly:
             print(f"{npairs} read pairs.", file=sys.stderr)
-        
         if npairs ==0:
             if not args.run_quietly:
                 print("\n", file=sys.stderr)
             continue
-        
         #get the start and end for variants, which will possibly extend a little either way because of the reads that overlap
         variants_start = min([read.reference_start for read in window_reads]) + 1 #also make it 1-based for vcf
         variants_end = max([read.reference_end for read in window_reads]) + 1
-        
         #variants = get_phased_variants(vcf, chrom if chrom_name_dict else chrom,
         #                               start=variants_start, end=variants_end,
         #                               sample_idx=sample_idx, useREFandALT=args.use_REF_and_ALT)
-
         variants = get_phased_variants(vcf, chrom,
                                        start=variants_start, end=variants_end,
                                        sample_idx=sample_idx, useREFandALT=args.use_REF_and_ALT)
-
+        #variants = get_phased_variants(vcf, chrom, start=variants_start, end=variants_end,sample_idx=sample_idx, useREFandALT=True)
         if not args.run_quietly:
             print(f"{len(variants)} phased variants.", file=sys.stderr)
-
         pairs_phased = 0
-        
         for reads in reads_by_pair.values():
             #phase = get_phase_for_reads(reads, variants, min_matches=1, min_base_qual=20)
             phase = get_phase_for_reads(reads, variants, min_matches=args.min_matches, min_base_qual=args.min_base_qual)
-            
             if phase is not None:
                 pairs_phased += 1
                 for read in reads:
                     outBams[phase].write(read)
-        
         if not args.run_quietly:
             print(f"{pairs_phased} read pairs were phased.\n", file=sys.stderr)
-        
         previous_read_names = set(reads_by_pair.keys())
+    window_size=args.step_size*2
+    #window_size=step_size*2
+
 
 
 
