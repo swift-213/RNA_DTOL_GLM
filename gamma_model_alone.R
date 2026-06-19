@@ -7,6 +7,8 @@ all_indels_df <- read_delim("/mnt/loki/martin/frankie/RNA_seq_glm/2_R_files/2_ou
                                            trim_ws = TRUE)
 
 ##removing indels with no genes within 100 kb
+
+all_indels_lep_subset = subset(all_indels_df, all_indels_df$Order == 'Lepidoptera')
 all_indel_no_na = subset(all_indels_df, complete.cases(all_indels_df))
 
 ##adding in our odds of imbalance ratio. We add 1 not 0.5 to be conservative on the log scale for the small values e.g 1/0, log(1.5/0.5) = 1.09 vs log(2/1) = 0.69 . We don't want to overestimate imbalance
