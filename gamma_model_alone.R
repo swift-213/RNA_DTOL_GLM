@@ -34,7 +34,7 @@ all_indel_no_na$indel_length_log <- log(all_indel_no_na$indel_length)
 summary(all_indel_no_na$pos_odds)
 
 gamma_model_all_individuals <- glmmTMB(
-  pos_odds ~ indel_length_log + distance_to_TSS_kb + gene_location + (1 | ID / indel_chrom) + (1| Order),
+  pos_odds ~ indel_length_log + distance_to_TSS_kb + gene_location + (1 | ID / indel_chrom),
   family = Gamma(link = "log"),
   weights = depth_weight,
   data = all_indel_no_na,
