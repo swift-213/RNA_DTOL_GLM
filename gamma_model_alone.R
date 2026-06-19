@@ -45,7 +45,7 @@ gamma_model_all_individuals <- glmmTMB(
 )
 
 #save the model
-saveRDS(gamma_model_all_individuals, "/mnt/loki/martin/frankie/RNA_seq_glm/2_R_files/2_output_datafiles/gamma_model_all_individuals.rds")
+saveRDS(gamma_model_all_individuals, "/mnt/loki/martin/frankie/RNA_seq_glm/2_R_files/2_output_datafiles/gamma_model_all_individuals_lep_subset.rds")
 #gamma_model_all_individuals <- readRDS("/mnt/loki/martin/frankie/RNA_seq_glm/2_R_files/2_output_datafiles/gamma_model_all_individuals.rds")
 
 #analyse the model
