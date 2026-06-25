@@ -33,6 +33,13 @@ all_indel_no_na$indel_length_log <- log(all_indel_no_na$indel_length)
 ##remove zeros - if there are any but i don't think there should be !
 summary(all_indel_no_na$pos_odds)
 
+##removing_crazy_outlier
+all_indel_no_na = subset(all_indel_no_na, all_indel_no_na$gene_name != 'gene:ENSRTBG00005004283')
+
+##scaling the pos_odds
+all_indel_no_na$pos_odds_scaled <- all_indel_no_na$pos_odds / mean(all_indel_no_na$pos_odds)
+
+
 gamma_model_all_individuals <- glmmTMB(
   pos_odds ~ indel_length_log + distance_to_TSS_kb + gene_location + (1 | ID / indel_chrom),
   family = Gamma(link = "log"),
