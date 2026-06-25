@@ -41,7 +41,7 @@ all_indel_no_na$pos_odds_scaled <- all_indel_no_na$pos_odds / mean(all_indel_no_
 
 
 gamma_model_all_individuals <- glmmTMB(
-  pos_odds ~ indel_length_log + distance_to_TSS_kb + gene_location + (1 | ID / indel_chrom),
+  pos_odds_scaled ~ indel_length_log + distance_to_TSS_kb + gene_location + (1 | ID / indel_chrom),
   family = Gamma(link = "log"),
   weights = depth_weight,
   data = all_indel_no_na,
