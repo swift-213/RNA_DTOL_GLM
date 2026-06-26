@@ -19,10 +19,12 @@ all_indel_no_na$odds <- (all_indel_no_na$number_of_reads_aligning_to_reference_h
 all_indel_no_na$log_odds <- log(all_indel_no_na$odds)
 
 #defining_weight_column
-all_indel_no_na$depth_weight <- log(
+all_indel_no_na$depth_weight_logged <- log(
   all_indel_no_na$number_of_reads_aligning_to_reference_haplotype + 
   all_indel_no_na$number_of_reads_aligning_to_alternate_haplotype + 1
 )
+
+all_indel_no_na$depth_weight <- all_indel_no_na$number_of_reads_aligning_to_reference_haplotype + all_indel_no_na$number_of_reads_aligning_to_alternate_haplotype + 1
 
 #rescaling the dostance to TSS column -> too small values make the model unstable
 all_indel_no_na$distance_to_TSS_kb <- all_indel_no_na$distance_to_TSS / 1000
@@ -31,7 +33,7 @@ all_indel_no_na$distance_to_TSS_kb <- all_indel_no_na$distance_to_TSS / 1000
 all_indel_no_na$indel_length_log <- log(all_indel_no_na$indel_length)
 
 ##remove zeros - if there are any but i don't think there should be !
-summary(all_indel_no_na$pos_odds)
+
 
 ##removing_crazy_outlier
 all_indel_no_na = subset(all_indel_no_na, all_indel_no_na$gene_name != 'gene:ENSRTBG00005004283')
@@ -39,20 +41,69 @@ all_indel_no_na = subset(all_indel_no_na, all_indel_no_na$gene_name != 'gene:ENS
 ##scaling the pos_odds
 all_indel_no_na$pos_odds_scaled <- all_indel_no_na$pos_odds / mean(all_indel_no_na$pos_odds)
 
+summary(all_indel_no_na$pos_odds)
+summary(all_indel_no_na$pos_odds_scaled)
 
+##test 1 - simple model
 gamma_model_all_individuals <- glmmTMB(
-  pos_odds_scaled ~ indel_length_log + distance_to_TSS_kb + gene_location + (1 | ID / indel_chrom),
+  pos_odds_scaled ~ 1,
   family = Gamma(link = "log"),
-  weights = depth_weight,
   data = all_indel_no_na,
-  control = glmmTMBControl(
-    optCtrl = list(iter.max = 2000, eval.max = 2000),
-    parallel = 4
-  )
 )
 
 #save the model
-saveRDS(gamma_model_all_individuals, "/mnt/loki/martin/frankie/RNA_seq_glm/2_R_files/2_output_datafiles/gamma_model_all_individuals_lep_subset.rds")
+saveRDS(gamma_model_all_individuals, "/mnt/loki/martin/frankie/RNA_seq_glm/2_R_files/2_output_datafiles/gamma_model_all_individuals_lep_subset_intercept_only_model.rds")
+
+
+##test 2 - fixed_effects model
+gamma_model_all_individuals <- glmmTMB(
+  pos_odds_scaled ~ indel_length_log + distance_to_TSS_kb + gene_location,
+  family = Gamma(link = "log"),
+  data = all_indel_no_na,
+)
+
+#save the model
+saveRDS(gamma_model_all_individuals, "/mnt/loki/martin/frankie/RNA_seq_glm/2_R_files/2_output_datafiles/gamma_model_all_individuals_lep_subset_fixed_effects_model.rds")
+
+
+##test 3 - fixed_effects with weights model
+gamma_model_all_individuals <- glmmTMB(
+  pos_odds_scaled ~ indel_length_log + distance_to_TSS_kb + gene_location,
+  family = Gamma(link = "log"),
+  weights = depth_weight,
+  data = all_indel_no_na,
+)
+
+#save the model
+saveRDS(gamma_model_all_individuals, "/mnt/loki/martin/frankie/RNA_seq_glm/2_R_files/2_output_datafiles/gamma_model_all_individuals_lep_subset_fixed_effects_with_weights_model.rds")
+
+##test 4 - fixed_effects with log_weights model
+gamma_model_all_individuals <- glmmTMB(
+  pos_odds_scaled ~ indel_length_log + distance_to_TSS_kb + gene_location,
+  family = Gamma(link = "log"),
+  weights = depth_weight_logged,
+  data = all_indel_no_na,
+)
+
+#save the model
+saveRDS(gamma_model_all_individuals, "/mnt/loki/martin/frankie/RNA_seq_glm/2_R_files/2_output_datafiles/gamma_model_all_individuals_lep_subset_fixed_effects_with_logged_weights_model.rds")
+
+
+
+
+##gamma_model_all_individuals <- glmmTMB(
+##  pos_odds_scaled ~ indel_length_log + distance_to_TSS_kb + gene_location + (1 | ID / indel_chrom),
+##  family = Gamma(link = "log"),
+##  weights = depth_weight,
+##  data = all_indel_no_na,
+##  control = glmmTMBControl(
+##    optCtrl = list(iter.max = 2000, eval.max = 2000),
+##    parallel = 4
+##  )
+##)
+
+#save the model
+#saveRDS(gamma_model_all_individuals, "/mnt/loki/martin/frankie/RNA_seq_glm/2_R_files/2_output_datafiles/gamma_model_all_individuals_lep_subset_full_model.rds")
 #gamma_model_all_individuals <- readRDS("/mnt/loki/martin/frankie/RNA_seq_glm/2_R_files/2_output_datafiles/gamma_model_all_individuals.rds")
 
 #analyse the model
