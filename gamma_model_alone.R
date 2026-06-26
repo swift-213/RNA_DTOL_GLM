@@ -45,6 +45,7 @@ summary(all_indel_no_na$pos_odds)
 summary(all_indel_no_na$pos_odds_scaled)
 
 ##test 1 - simple model
+paste('model1')
 gamma_model_all_individuals <- glmmTMB(
   pos_odds_scaled ~ 1,
   family = Gamma(link = "log"),
@@ -53,8 +54,9 @@ gamma_model_all_individuals <- glmmTMB(
 
 #save the model
 saveRDS(gamma_model_all_individuals, "/mnt/loki/martin/frankie/RNA_seq_glm/2_R_files/2_output_datafiles/gamma_model_all_individuals_lep_subset_intercept_only_model.rds")
+paste('model1 done')
 
-
+paste('model2')
 ##test 2 - fixed_effects model
 gamma_model_all_individuals <- glmmTMB(
   pos_odds_scaled ~ indel_length_log + distance_to_TSS_kb + gene_location,
@@ -64,8 +66,9 @@ gamma_model_all_individuals <- glmmTMB(
 
 #save the model
 saveRDS(gamma_model_all_individuals, "/mnt/loki/martin/frankie/RNA_seq_glm/2_R_files/2_output_datafiles/gamma_model_all_individuals_lep_subset_fixed_effects_model.rds")
+paste('model2 done')
 
-
+paste('model3')
 ##test 3 - fixed_effects with weights model
 gamma_model_all_individuals <- glmmTMB(
   pos_odds_scaled ~ indel_length_log + distance_to_TSS_kb + gene_location,
@@ -76,7 +79,9 @@ gamma_model_all_individuals <- glmmTMB(
 
 #save the model
 saveRDS(gamma_model_all_individuals, "/mnt/loki/martin/frankie/RNA_seq_glm/2_R_files/2_output_datafiles/gamma_model_all_individuals_lep_subset_fixed_effects_with_weights_model.rds")
+paste('model3 done')
 
+paste('model4')
 ##test 4 - fixed_effects with log_weights model
 gamma_model_all_individuals <- glmmTMB(
   pos_odds_scaled ~ indel_length_log + distance_to_TSS_kb + gene_location,
@@ -87,7 +92,7 @@ gamma_model_all_individuals <- glmmTMB(
 
 #save the model
 saveRDS(gamma_model_all_individuals, "/mnt/loki/martin/frankie/RNA_seq_glm/2_R_files/2_output_datafiles/gamma_model_all_individuals_lep_subset_fixed_effects_with_logged_weights_model.rds")
-
+paste('model4 done')
 
 
 
